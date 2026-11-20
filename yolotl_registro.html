@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yólotl Anáhuac - Visualizador de Fachadas CDMX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .canvas-container { touch-action: none; user-select: none; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-amber-600 via-rose-600 to-red-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <!-- Emblema Oficial Yólotl Anáhuac (Corazón) -->
+                <div class="w-11 h-12 rounded-xl bg-white/15 backdrop-blur-xs flex items-center justify-center p-1 border border-white/30 shadow-sm shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 145" class="w-full h-full drop-shadow">
+                        <!-- Contorno festoneado morado -->
+                        <path d="M60 8 C35 8 15 24 14 52 C13 80 35 104 60 116 C85 104 107 80 106 52 C105 24 85 8 60 8 Z" fill="#9b72cf" stroke="#1e1b18" stroke-width="3.5" stroke-linejoin="round"/>
+                        <!-- Puntos blancos decorativos en marco -->
+                        <circle cx="60" cy="14" r="2.8" fill="#ffffff"/>
+                        <circle cx="34" cy="21" r="2.8" fill="#ffffff"/>
+                        <circle cx="86" cy="21" r="2.8" fill="#ffffff"/>
+                        <circle cx="20" cy="44" r="2.8" fill="#ffffff"/>
+                        <circle cx="100" cy="44" r="2.8" fill="#ffffff"/>
+                        <circle cx="25" cy="72" r="2.8" fill="#ffffff"/>
+                        <circle cx="95" cy="72" r="2.8" fill="#ffffff"/>
+                        <circle cx="42" cy="96" r="2.8" fill="#ffffff"/>
+                        <circle cx="78" cy="96" r="2.8" fill="#ffffff"/>
+                        <!-- Fondo amarillo interior -->
+                        <path d="M60 18 C40 18 24 31 24 53 C24 75 42 95 60 105 C78 95 96 75 96 53 C96 31 80 18 60 18 Z" fill="#facc15" stroke="#1e1b18" stroke-width="2.5"/>
+                        <!-- Arterias superiores -->
+                        <path d="M47 42 L44 26 Q49 23 55 26 L56 42 Z" fill="#f43f5e" stroke="#1e1b18" stroke-width="2.5"/>
+                        <path d="M64 42 L66 27 Q72 24 76 28 L72 44 Z" fill="#f43f5e" stroke="#1e1b18" stroke-width="2.5"/>
+                        <!-- Parte superior del corazón -->
+                        <path d="M31 54 C27 36 48 33 60 47 C72 33 93 36 89 54 C88 62 84 67 84 67 L36 67 C36 67 32 62 31 54 Z" fill="#f43f5e" stroke="#1e1b18" stroke-width="2.5"/>
+                        <!-- Franja central roja con 3 círculos turquesa -->
+                        <rect x="35" y="64" width="50" height="17" rx="5" fill="#dc2626" stroke="#1e1b18" stroke-width="2.5"/>
+                        <circle cx="45" cy="72.5" r="4.5" fill="#2dd4bf" stroke="#1e1b18" stroke-width="2"/>
+                        <circle cx="45" cy="72.5" r="1.5" fill="#facc15"/>
+                        <circle cx="60" cy="72.5" r="4.5" fill="#2dd4bf" stroke="#1e1b18" stroke-width="2"/>
+                        <circle cx="60" cy="72.5" r="1.5" fill="#facc15"/>
+                        <circle cx="75" cy="72.5" r="4.5" fill="#2dd4bf" stroke="#1e1b18" stroke-width="2"/>
+                        <circle cx="75" cy="72.5" r="1.5" fill="#facc15"/>
+                        <!-- Punta inferior vino -->
+                        <path d="M38 81 L82 81 C78 92 60 101 60 101 C60 101 42 92 38 81 Z" fill="#9f1239" stroke="#1e1b18" stroke-width="2.5"/>
+                        <!-- Gota/sello inferior -->
+                        <circle cx="60" cy="130" r="8" fill="#ffffff" stroke="#1e1b18" stroke-width="2.5"/>
+                        <circle cx="60" cy="130" r="4" fill="#2dd4bf" stroke="#1e1b18" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg sm:text-xl leading-tight">Yólotl Anáhuac</h1>
+                    <p class="text-xs text-amber-100 font-medium hidden sm:block">Simulador Comunitario de Fachadas y Zócalos - CDMX</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <label for="imageUpload" class="cursor-pointer bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm flex items-center space-x-2 border border-white/30 transition">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Subir Foto</span>
+                </label>
+                <input type="file" id="imageUpload" accept="image/*" class="hidden">
+
+                <button id="btnExport" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm flex items-center space-x-2 shadow-sm transition">
+                    <i class="fa-solid fa-download"></i>
+                    <span class="hidden sm:inline">Guardar Imagen</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-2 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+        <!-- Canvas Area -->
+        <section class="lg:col-span-8 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 p-2 sm:p-3 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex flex-wrap items-center bg-slate-200/70 p-1 rounded-xl gap-1">
+                    <button id="modePoly" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition bg-white text-blue-600 shadow-sm">
+                        <i class="fa-solid fa-draw-polygon"></i>
+                        <span>1. Delimitar Muros</span>
+                    </button>
+                    <button id="modePaint" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition text-slate-600 hover:text-slate-900">
+                        <i class="fa-solid fa-paint-roller"></i>
+                        <span>2. Pintar</span>
+                    </button>
+                    <button id="modeCenefa" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition text-slate-600 hover:text-slate-900">
+                        <i class="fa-solid fa-grip-lines"></i>
+                        <span>3. Cenefa</span>
+                    </button>
+                    <button id="modeSticker" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center space-x-1.5 transition text-slate-600 hover:text-slate-900">
+                        <i class="fa-solid fa-icons"></i>
+                        <span>4. Zócalos</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button id="btnUndo" class="p-2 text-slate-600 hover:bg-slate-200 rounded-lg text-sm" title="Deshacer">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                    <button id="btnClear" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg text-sm font-medium flex items-center space-x-1" title="Limpiar">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span class="text-xs hidden sm:inline">Reiniciar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sub-barra Delimitar -->
+            <div id="polyToolbar" class="bg-slate-100 border-b border-slate-200 px-3 py-2 flex flex-col gap-2 text-xs">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button id="targetUpper" class="px-2.5 py-1 rounded-lg font-bold flex items-center space-x-1.5 bg-blue-600 text-white shadow-xs transition">
+                            <span class="w-2.5 h-2.5 rounded-full bg-white"></span>
+                            <span>Parte Arriba (Azul)</span>
+                        </button>
+                        <button id="targetLower" class="px-2.5 py-1 rounded-lg font-bold flex items-center space-x-1.5 bg-white text-emerald-700 border border-emerald-300 hover:bg-emerald-50 transition">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                            <span>Parte Abajo (Verde)</span>
+                        </button>
+                        <button id="targetHole" class="px-2.5 py-1 rounded-lg font-bold flex items-center space-x-1.5 bg-white text-rose-700 border border-rose-300 hover:bg-rose-50 transition">
+                            <i class="fa-solid fa-border-none"></i>
+                            <span>+ Excluir Ventana/Puerta</span>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <label class="flex items-center space-x-1 text-slate-700 cursor-pointer mr-1 font-medium">
+                            <input type="checkbox" id="showPolyGuide" checked class="accent-blue-600 rounded">
+                            <span>Ver guías</span>
+                        </label>
+                        <button id="btnCloseActivePoly" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold px-2.5 py-1 rounded-lg shadow-xs transition hidden">
+                            <i class="fa-solid fa-check mr-1"></i>Cerrar Trazo
+                        </button>
+                        <button id="btnResetPoly" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 font-semibold px-2.5 py-1 rounded-lg transition">
+                            Borrar Límites
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 text-slate-700 font-medium bg-white/80 px-2.5 py-1 rounded-lg border border-slate-200/80">
+                    <i class="fa-solid fa-circle-info text-blue-600"></i>
+                    <span id="polyHint">Toca las esquinas de la Parte Arriba (encima de la cenefa) y pulsa 'Cerrar Trazo'.</span>
+                </div>
+            </div>
+
+            <!-- Canvas Viewport -->
+            <div class="relative bg-slate-800 flex items-center justify-center p-3 overflow-hidden canvas-container min-h-[420px] lg:min-h-[540px]" id="canvasWrapper">
+                <canvas id="mainCanvas" style="max-width: 100%; max-height: 70vh; width: auto; height: auto;" class="shadow-lg rounded cursor-crosshair bg-slate-700"></canvas>
+                
+                <!-- Floating Element Toolbar (Zócalo o Cenefa) -->
+                <div id="floatingStickerControls" class="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-3 py-2 rounded-2xl shadow-xl flex items-center space-x-2 hidden z-20 border border-slate-700">
+                    <span id="floatingElementLabel" class="text-xs font-bold px-2 text-amber-400 border-r border-slate-700 hidden sm:inline">Zócalo</span>
+                    <button id="quickScaleUp" class="p-2 hover:bg-slate-700 rounded-lg text-xs font-bold" title="Agrandar / Estirar"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                    <button id="quickScaleDown" class="p-2 hover:bg-slate-700 rounded-lg text-xs font-bold" title="Reducir / Encoger"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                    <button id="quickRotateLeft" class="p-2 hover:bg-slate-700 rounded-lg text-xs" title="Inclinar Izquierda"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button id="quickRotateRight" class="p-2 hover:bg-slate-700 rounded-lg text-xs" title="Inclinar Derecha"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button id="quickDuplicate" class="p-2 hover:bg-slate-700 rounded-lg text-xs text-amber-300" title="Duplicar"><i class="fa-solid fa-clone"></i></button>
+                    <button id="quickDelete" class="p-2 hover:bg-rose-900/80 rounded-lg text-xs text-rose-400 font-bold" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+
+                <div class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full pointer-events-none flex items-center space-x-2 z-10">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="canvasStatus">Paso 1: Delimita la Parte Arriba y la Parte Abajo de la fachada</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sidebar -->
+        <aside class="lg:col-span-4 flex flex-col space-y-4">
+
+            <!-- Panel 0: Registro de Datos del Vecino -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-address-card text-rose-600"></i>
+                        <span>Datos del Vecino</span>
+                    </h2>
+                    <span id="recordsCounterBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">0 guardados</span>
+                </div>
+
+                <form id="neighborForm" class="space-y-2.5 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-0.5">Nombre completo *</label>
+                        <input type="text" id="regNombre" required placeholder="Ej. María Guadalupe Hernández" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:border-rose-500">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-0.5">Dirección (Calle, Manzana, Lote / No.) *</label>
+                        <input type="text" id="regDireccion" required placeholder="Ej. Calle Tepocatl Mz. 14 Lt. 8" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:border-rose-500">
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-0.5">
+                            <label class="font-semibold text-slate-600">Coordenadas GPS</label>
+                            <span id="gpsAccuracyLabel" class="text-[10px] text-slate-400"></span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <input type="text" id="regCoordenadas" placeholder="Latitud, Longitud" class="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 font-mono text-[11px] focus:outline-none focus:border-blue-500">
+                            <button type="button" id="btnGetGPS" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center space-x-1 shrink-0 transition" title="Detectar ubicación actual">
+                                <i class="fa-solid fa-location-crosshairs"></i>
+                                <span>GPS</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-0.5">Largo del muro (m)</label>
+                            <input type="number" step="0.01" min="0" id="regLargo" placeholder="Ej. 8.50" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:border-rose-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-0.5">Ancho / Alto muro (m)</label>
+                            <input type="number" step="0.01" min="0" id="regAncho" placeholder="Ej. 3.20" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:border-rose-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-0.5">Teléfono</label>
+                            <input type="tel" id="regTelefono" placeholder="Ej. 55 1234 5678" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:border-rose-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-0.5">Referencia de la casa</label>
+                            <input type="text" id="regReferencia" placeholder="Ej. Portón verde, frente a tienda" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:border-rose-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button type="submit" class="py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Guardar Registro</span>
+                        </button>
+                        <button type="button" id="btnExportCSV" class="py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Descargar Excel</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="regFeedback" class="hidden mt-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-lg"></div>
+
+                <div class="mt-3 pt-2.5 border-t border-slate-100">
+                    <button type="button" id="toggleRecordsList" class="w-full flex items-center justify-between text-xs font-semibold text-slate-600 hover:text-slate-900">
+                        <span>Ver listado guardado en este equipo</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]" id="recordsChevron"></i>
+                    </button>
+                    <div id="recordsListContainer" class="hidden mt-2 max-h-40 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
+            </div>
+
+            <!-- Panel 1: Paleta -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-palette text-amber-600"></i>
+                        <span>Paleta Tradicional CDMX</span>
+                    </h2>
+                    <span id="selectedColorName" class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600">Azul Teotihuacano</span>
+                </div>
+
+                <div class="grid grid-cols-5 gap-2 mb-4" id="colorPalette"></div>
+
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button id="btnFillUpper" class="py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-fill-drip"></i>
+                        <span>Rellenar Arriba</span>
+                    </button>
+                    <button id="btnFillLower" class="py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                        <i class="fa-solid fa-fill-drip"></i>
+                        <span>Rellenar Abajo</span>
+                    </button>
+                </div>
+
+                <div id="paintControls" class="space-y-3 pt-2 border-t border-slate-100">
+                    <div class="flex items-center justify-between gap-2">
+                        <button id="toolBrush" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-rose-600 text-white flex items-center justify-center space-x-1.5 transition">
+                            <i class="fa-solid fa-paintbrush"></i>
+                            <span>Pincel</span>
+                        </button>
+                        <button id="toolEraser" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center justify-center space-x-1.5 transition">
+                            <i class="fa-solid fa-eraser"></i>
+                            <span>Borrador Fino</span>
+                        </button>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                            <span>Grosor de Pincel / Borrador</span>
+                            <span id="brushSizeVal">45px</span>
+                        </div>
+                        <input type="range" id="brushSize" min="8" max="120" value="45" class="w-full accent-rose-600 cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: Cenefa Ajustable (Arrastrable y Estirable) -->
+            <div id="cenefaPanel" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-grip-lines text-amber-600"></i>
+                        <span>Cenefa Ajustable</span>
+                    </h2>
+                    <button type="button" id="btnAddCenefa" class="text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg flex items-center space-x-1 transition">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>+ Agregar Tramo</span>
+                    </button>
+                </div>
+                <p class="text-[11px] text-slate-500 mb-3">Aparece en tamaño compacto: arrástrala sobre la fachada y estírala al ancho de la casa.</p>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-medium text-slate-600">Mostrar Cenefa en Fachada</label>
+                        <input type="checkbox" id="cenefaToggle" class="w-4 h-4 accent-rose-600 rounded cursor-pointer" checked>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                            <span>Largo / Estirar Ancho</span>
+                            <span id="cenefaWidthVal">30%</span>
+                        </div>
+                        <input type="range" id="cenefaWidth" min="8" max="100" value="30" class="w-full accent-rose-600 cursor-pointer">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <div class="flex justify-between text-[11px] font-medium text-slate-600 mb-1">
+                                <span>Grosor</span>
+                                <span id="cenefaThicknessVal">18px</span>
+                            </div>
+                            <input type="range" id="cenefaThickness" min="6" max="55" value="18" class="w-full accent-rose-600 cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] font-medium text-slate-600 mb-1">
+                                <span>Inclinación</span>
+                                <span id="cenefaAngleVal">0°</span>
+                            </div>
+                            <input type="range" id="cenefaAngle" min="-35" max="35" value="0" class="w-full accent-rose-600 cursor-pointer">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="text-xs font-medium text-slate-600">Color de Cenefa:</span>
+                        <div class="flex items-center gap-1.5" id="cenefaColorQuick">
+                            <button type="button" data-col="#f5b719" class="w-5 h-5 rounded-full bg-[#f5b719] border-2 border-slate-800 shadow-2xs" title="Amarillo Cenefa"></button>
+                            <button type="button" data-col="#f8f9fa" class="w-5 h-5 rounded-full bg-[#f8f9fa] border border-slate-400 shadow-2xs" title="Blanco Cantera"></button>
+                            <button type="button" data-col="#d9383a" class="w-5 h-5 rounded-full bg-[#d9383a] border border-white shadow-2xs" title="Rojo Óxido"></button>
+                            <button type="button" data-col="#00a896" class="w-5 h-5 rounded-full bg-[#00a896] border border-white shadow-2xs" title="Azul Turquesa"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 3: Zócalos -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-1">
+                    <h2 class="font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-icons text-amber-600"></i>
+                        <span>Catálogo de Zócalos</span>
+                    </h2>
+                    <label for="customZocaloUpload" class="cursor-pointer text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 rounded-lg flex items-center space-x-1 transition" title="Sube tus zócalos JPG/PNG (quita el fondo negro automáticamente)">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>+ Subir PNG/JPG</span>
+                    </label>
+                    <input type="file" id="customZocaloUpload" accept="image/*" multiple class="hidden">
+                </div>
+                <p class="text-xs text-slate-500 mb-3">Toca una figura para ponerla en la pared o sube tus imágenes JPG/PNG.</p>
+
+                <div class="grid grid-cols-3 gap-2 overflow-y-auto max-h-64 p-1.5 bg-slate-50 rounded-xl border border-slate-100" id="stickersGrid"></div>
+
+                <div id="stickerControls" class="mt-4 pt-3 border-t border-slate-100 hidden space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-700" id="selectedStickerTitle">Zócalo Seleccionado</span>
+                        <button id="btnDeleteSticker" class="text-rose-600 hover:text-rose-700 text-xs font-bold flex items-center space-x-1 bg-rose-50 px-2 py-1 rounded-lg">
+                            <i class="fa-solid fa-trash"></i>
+                            <span>Eliminar</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-[11px] font-medium text-slate-500">Tamaño</span>
+                            <input type="range" id="stickerScale" min="0.3" max="3.5" step="0.05" value="1" class="w-full accent-rose-600 cursor-pointer">
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-medium text-slate-500">Rotación</span>
+                            <input type="range" id="stickerRotate" min="-180" max="180" value="0" class="w-full accent-rose-600 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 py-3 text-center text-xs">
+        <p>Programa de Mejoramiento Urbano y Pueblos Originarios - <strong>Yólotl Anáhuac CDMX</strong></p>
+    </footer>
+
+    <script>
+        const STORAGE_KEY = 'yolotl_anahuac_vecinos_v2';
+
+        const PALETTE = [
+            { name: "Azul Teotihuacano", hex: "#1e52a4" },
+            { name: "Rojo Óxido / Coral", hex: "#d9383a" },
+            { name: "Amarillo Cenefa", hex: "#f5b719" },
+            { name: "Verde Nopal", hex: "#2d7d46" },
+            { name: "Rosa Mexicano", hex: "#e42575" },
+            { name: "Naranja Atardecer", hex: "#e8621d" },
+            { name: "Azul Turquesa", hex: "#00a896" },
+            { name: "Terracota", hex: "#b84a27" },
+            { name: "Blanco Cantera", hex: "#f8f9fa" },
+            { name: "Gris Piedra", hex: "#5c6470" }
+        ];
+
+        const ZOCALOS_DATA = [
+            {
+                id: 'cacomixtle', title: 'Cacomixtle',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#c83e2b" stroke="#2596be" stroke-width="5"/><path d="M25 65 Q50 90 75 65" stroke="#f4d046" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M32 68 L36 74 M48 75 L52 75 M64 74 L68 68" stroke="#1e1b18" stroke-width="4"/><circle cx="50" cy="43" r="16" fill="#f2d685"/><path d="M36 33 L33 21 L44 28 Z M64 33 L67 21 L56 28 Z" fill="#b38b59"/><circle cx="44" cy="42" r="4" fill="#3a2315"/><circle cx="56" cy="42" r="4" fill="#3a2315"/><circle cx="50" cy="48" r="2.5" fill="#111"/></svg>`
+            },
+            {
+                id: 'chinelo', title: 'Chinelo',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="26" y="12" width="48" height="38" rx="6" fill="#1d63b8" stroke="#84cc16" stroke-width="4"/><rect x="28" y="25" width="44" height="8" fill="#e11d68"/><rect x="28" y="33" width="44" height="8" fill="#f97316"/><circle cx="35" cy="47" r="3" fill="#22c55e"/><circle cx="50" cy="47" r="3" fill="#22c55e"/><circle cx="65" cy="47" r="3" fill="#22c55e"/><rect x="34" y="50" width="32" height="28" rx="12" fill="#e5b887"/><rect x="34" y="55" width="32" height="8" fill="#1d63b8"/><circle cx="43" cy="59" r="2" fill="#fff"/><circle cx="57" cy="59" r="2" fill="#fff"/><circle cx="28" cy="68" r="7" fill="none" stroke="#facc15" stroke-width="3"/><circle cx="72" cy="68" r="7" fill="none" stroke="#facc15" stroke-width="3"/></svg>`
+            },
+            {
+                id: 'corazon', title: 'Corazón',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="52" rx="34" ry="42" fill="#9b72cf" stroke="#facc15" stroke-width="4"/><path d="M42 26 L42 15 M58 26 L58 15" stroke="#ef4444" stroke-width="7" stroke-linecap="round"/><path d="M28 45 C22 25 46 24 50 40 C54 24 78 25 72 45 C72 65 50 82 50 82 C50 82 28 65 28 45 Z" fill="#ef4444"/><rect x="31" y="48" width="38" height="12" rx="4" fill="#dc2626"/><circle cx="39" cy="54" r="3.5" fill="#2dd4bf"/><circle cx="50" cy="54" r="3.5" fill="#2dd4bf"/><circle cx="61" cy="54" r="3.5" fill="#2dd4bf"/></svg>`
+            },
+            {
+                id: 'lagartija', title: 'Lagartija',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="12" y="20" width="76" height="60" rx="22" fill="#facc15" stroke="#e11d68" stroke-width="5"/><path d="M26 42 Q50 28 74 44 Q82 65 52 68 Q30 68 28 56" stroke="#15803d" stroke-width="11" fill="none" stroke-linecap="round"/><circle cx="28" cy="40" r="8" fill="#15803d"/><circle cx="27" cy="39" r="2.5" fill="#fff"/></svg>`
+            },
+            {
+                id: 'maiz', title: 'Maíz',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="34" ry="43" fill="#22d3ee" stroke="#d946ef" stroke-width="5"/><ellipse cx="42" cy="46" rx="11" ry="23" fill="#facc15" stroke="#854d0e" stroke-width="2"/><path d="M36 23 L33 14 M42 22 L42 13 M48 23 L51 14" stroke="#92400e" stroke-width="2.5"/><path d="M27 55 Q50 82 73 55 L64 32 Q50 55 36 32 Z" fill="#4d7c0f"/></svg>`
+            },
+            {
+                id: 'nopal', title: 'Nopal',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#4ade80" stroke="#166534" stroke-width="4"/><ellipse cx="50" cy="44" rx="11" ry="22" fill="#15803d"/><ellipse cx="32" cy="52" rx="12" ry="7" fill="#15803d"/><ellipse cx="68" cy="52" rx="12" ry="7" fill="#15803d"/><circle cx="30" cy="39" r="5" fill="#dc2626"/><circle cx="70" cy="39" r="5" fill="#dc2626"/><rect x="38" y="64" width="24" height="18" rx="4" fill="#1d4ed8"/></svg>`
+            },
+            {
+                id: 'pato', title: 'Ave / Pato',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M48 45 L28 16 L60 36 Z" fill="#f97316" stroke="#9a3412" stroke-width="2"/><path d="M46 58 L30 84 L58 64 Z" fill="#f97316" stroke="#9a3412" stroke-width="2"/><path d="M22 44 L10 38 L12 52 L10 64 L22 58 Z" fill="#facc15"/><ellipse cx="52" cy="52" rx="24" ry="13" fill="#16a34a"/><circle cx="74" cy="48" r="10" fill="#16a34a"/><path d="M83 47 L95 51 L83 54 Z" fill="#facc15"/><circle cx="76" cy="46" r="2.5" fill="#fef08a"/></svg>`
+            },
+            {
+                id: 'axolote', title: 'Ajolote',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="#00a896"/><path d="M22 36 L12 28 M20 46 L9 44 M78 36 L88 28 M80 46 L91 44" stroke="#ff5c8a" stroke-width="5" stroke-linecap="round"/><ellipse cx="50" cy="52" rx="26" ry="20" fill="#ffb3c6"/><circle cx="41" cy="49" r="3" fill="#1e293b"/><circle cx="59" cy="49" r="3" fill="#1e293b"/><path d="M44 58 Q50 63 56 58" stroke="#e42575" stroke-width="2.5" fill="none"/></svg>`
+            },
+            {
+                id: 'sol', title: 'Sol Tonatiuh',
+                svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#f5b719"/><circle cx="50" cy="50" r="26" fill="#d9383a"/><circle cx="50" cy="50" r="14" fill="#f5b719"/></svg>`
+            }
+        ];
+
+        // --- ESTADO GLOBAL ---
+        let state = {
+            mode: 'poly',
+            polyTarget: 'upper',
+            activePoints: [],
+            upperPoly: null,
+            lowerPoly: null,
+            holePolys: [],
+            showPolyGuide: true,
+            selectedColor: PALETTE[0],
+            paintTool: 'brush',
+            brushSize: 45,
+            // Cenefas como elementos independientes arrastrables y estirables
+            cenefasVisible: true,
+            cenefas: [],
+            selectedCenefaId: null,
+            isDraggingCenefa: false,
+            stickers: [],
+            selectedStickerId: null,
+            isDrawing: false,
+            isDraggingSticker: false,
+            dragOffset: { x: 0, y: 0 },
+            history: []
+        };
+
+        let savedRecords = [];
+
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const paintCanvas = document.createElement('canvas');
+        const paintCtx = paintCanvas.getContext('2d');
+
+        const maskCanvas = document.createElement('canvas');
+        const maskCtx = maskCanvas.getContext('2d');
+
+        const bgImage = new Image();
+        let bgLoaded = false;
+        const stickerImages = {};
+
+        // --- INICIALIZACIÓN ---
+        function init() {
+            loadRecordsFromStorage();
+            renderRecordsUI();
+            renderPalette();
+            renderStickersCatalog();
+            loadDefaultFacade();
+            setupEventListeners();
+            setMode('poly');
+        }
+
+        // --- REGISTRO DE VECINOS ---
+        function loadRecordsFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                savedRecords = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                savedRecords = [];
+            }
+        }
+
+        function saveRecordsToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRecords));
+            } catch (e) {}
+            renderRecordsUI();
+        }
+
+        function renderRecordsUI() {
+            const badge = document.getElementById('recordsCounterBadge');
+            const container = document.getElementById('recordsListContainer');
+            badge.textContent = `${savedRecords.length} guardado${savedRecords.length === 1 ? '' : 's'}`;
+
+            if (savedRecords.length === 0) {
+                container.innerHTML = `<p class="text-[11px] text-slate-400 italic py-1">Aún no hay registros guardados en este dispositivo.</p>`;
+                return;
+            }
+
+            container.innerHTML = savedRecords.map((rec, idx) => `
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-[11px] flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="font-bold text-slate-800 truncate">${escapeHtml(rec.nombre)}</p>
+                        <p class="text-slate-600 truncate">${escapeHtml(rec.direccion)}</p>
+                        <p class="text-[10px] text-slate-500">
+                            ${rec.largo || rec.ancho ? `Muro: ${rec.largo || '?'}m × ${rec.ancho || '?'}m • ` : ''}
+                            ${rec.coordenadas ? `GPS: ${escapeHtml(rec.coordenadas)}` : ''}
+                        </p>
+                    </div>
+                    <button type="button" onclick="deleteNeighborRecord(${idx})" class="text-rose-500 hover:text-rose-700 p-1 shrink-0" title="Borrar registro">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.deleteNeighborRecord = function(idx) {
+            savedRecords.splice(idx, 1);
+            saveRecordsToStorage();
+        };
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+        }
+
+        function captureCurrentGPS() {
+            const btn = document.getElementById('btnGetGPS');
+            const input = document.getElementById('regCoordenadas');
+            const label = document.getElementById('gpsAccuracyLabel');
+
+            if (!navigator.geolocation) {
+                label.textContent = 'GPS no soportado';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>...</span>`;
+            label.textContent = 'Buscando satélites...';
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude.toFixed(6);
+                    const lng = pos.coords.longitude.toFixed(6);
+                    input.value = `${lat}, ${lng}`;
+                    label.textContent = `Precisión: ±${Math.round(pos.coords.accuracy)}m`;
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i><span>GPS</span>`;
+                },
+                () => {
+                    label.textContent = 'Activa ubicación en tu navegador';
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i><span>GPS</span>`;
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        function exportRecordsToExcelCSV() {
+            if (savedRecords.length === 0) {
+                alert('Primero guarda al menos un registro de vecino para descargar el Excel.');
+                return;
+            }
+
+            const headers = [
+                'Fecha y Hora', 'Nombre Completo', 'Direccion', 'Coordenadas GPS',
+                'Largo Muro (m)', 'Ancho / Alto Muro (m)', 'Area Estimada (m2)',
+                'Telefono', 'Referencia', 'Color Seleccionado', 'Zocalos Colocados'
+            ];
+
+            const rows = savedRecords.map(r => [
+                r.fecha, r.nombre, r.direccion, r.coordenadas,
+                r.largo, r.ancho, r.areaM2,
+                r.telefono, r.referencia, r.colorPrincipal, r.zocalos
+            ]);
+
+            const csvContent = '\uFEFF' + [headers, ...rows]
+                .map(row => row.map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(','))
+                .join('\r\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Registro_Yolotl_Anahuac_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- FACHADA POR DEFECTO ---
+        function loadDefaultFacade() {
+            const w = 900, h = 620;
+            const tempC = document.createElement('canvas');
+            tempC.width = w; tempC.height = h;
+            const tCtx = tempC.getContext('2d');
+
+            tCtx.fillStyle = "#bae6fd";
+            tCtx.fillRect(0, 0, w, 120);
+            tCtx.fillStyle = "#64748b";
+            tCtx.fillRect(0, 560, w, 60);
+
+            tCtx.fillStyle = "#e2e8f0";
+            tCtx.fillRect(90, 90, 720, 470);
+            tCtx.strokeStyle = "#cbd5e1";
+            tCtx.lineWidth = 2;
+            for (let y = 90; y < 560; y += 35) {
+                tCtx.beginPath(); tCtx.moveTo(90, y); tCtx.lineTo(810, y); tCtx.stroke();
+            }
+
+            tCtx.fillStyle = "#94a3b8";
+            tCtx.fillRect(80, 75, 740, 20);
+
+            tCtx.fillStyle = "#475569";
+            tCtx.fillRect(390, 320, 120, 240);
+            tCtx.strokeStyle = "#1e293b";
+            tCtx.lineWidth = 4;
+            tCtx.strokeRect(390, 320, 120, 240);
+
+            tCtx.fillStyle = "#334155";
+            tCtx.fillRect(160, 180, 150, 130);
+            tCtx.fillRect(590, 180, 150, 130);
+            tCtx.strokeStyle = "#f8fafc";
+            tCtx.lineWidth = 4;
+            tCtx.strokeRect(160, 180, 150, 130);
+            tCtx.strokeRect(590, 180, 150, 130);
+
+            bgImage.onload = () => {
+                setupCanvasDimensions(bgImage.width, bgImage.height);
+                bgLoaded = true;
+                render();
+            };
+            bgImage.src = tempC.toDataURL();
+        }
+
+        function createDefaultCenefa(w, h) {
+            return {
+                id: 'cen_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+                x: Math.round(w * 0.5),
+                y: Math.round(h * 0.55),
+                widthPercent: 30, // Inicia compacta (30% del ancho) para estirarla al tamaño de la casa
+                thickness: 18,
+                angle: 0,
+                color: '#f5b719'
+            };
+        }
+
+        function setupCanvasDimensions(w, h) {
+            const maxW = 1280;
+            if (w > maxW) {
+                h = Math.round(h * (maxW / w));
+                w = maxW;
+            }
+            canvas.width = w;
+            canvas.height = h;
+            paintCanvas.width = w;
+            paintCanvas.height = h;
+            maskCanvas.width = w;
+            maskCanvas.height = h;
+
+            paintCtx.clearRect(0, 0, w, h);
+            state.activePoints = [];
+            state.upperPoly = null;
+            state.lowerPoly = null;
+            state.holePolys = [];
+            state.stickers = [];
+            state.selectedStickerId = null;
+            
+            // Inicializa una cenefa compacta lista para mover y estirar
+            const initialCenefa = createDefaultCenefa(w, h);
+            state.cenefas = [initialCenefa];
+            state.selectedCenefaId = initialCenefa.id;
+            state.cenefasVisible = true;
+            document.getElementById('cenefaToggle').checked = true;
+
+            state.history = [];
+            updatePolyButtons();
+            syncCenefaControlsUI();
+            updateFloatingControlsUI();
+        }
+
+        // --- RENDERIZADO ---
+        function render() {
+            if (!bgLoaded) return;
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // 1. Foto base
+            ctx.drawImage(bgImage, 0, 0, w, h);
+
+            // 2. Pintura con efecto multiply
+            ctx.save();
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.globalAlpha = 0.86;
+            ctx.drawImage(paintCanvas, 0, 0);
+            ctx.restore();
+
+            // 3. Cenefas ajustables (compactas, arrastrables y estirables)
+            if (state.cenefasVisible && state.cenefas.length > 0) {
+                state.cenefas.forEach(cen => {
+                    const cWidth = Math.round((cen.widthPercent / 100) * w);
+                    const thick = cen.thickness;
+
+                    ctx.save();
+                    ctx.translate(cen.x, cen.y);
+                    ctx.rotate((cen.angle * Math.PI) / 180);
+
+                    // Fondo de cenefa
+                    ctx.fillStyle = cen.color;
+                    ctx.fillRect(-cWidth / 2, -thick / 2, cWidth, thick);
+
+                    // Patrón geométrico tradicional
+                    ctx.fillStyle = "rgba(0,0,0,0.28)";
+                    const step = Math.max(10, thick * 1.35);
+                    for (let lx = -cWidth / 2 + 4; lx < cWidth / 2 - 4; lx += step) {
+                        const blockW = Math.min(step * 0.45, (cWidth / 2) - lx);
+                        if (blockW > 1) {
+                            ctx.fillRect(lx, -thick / 4, blockW, thick / 2);
+                        }
+                    }
+
+                    // Marco de selección si está activa y estamos en modo cenefa
+                    if (cen.id === state.selectedCenefaId && state.mode === 'cenefa') {
+                        ctx.strokeStyle = "#2563eb";
+                        ctx.lineWidth = 2.5;
+                        ctx.setLineDash([6, 4]);
+                        ctx.strokeRect(-cWidth / 2 - 3, -thick / 2 - 3, cWidth + 6, thick + 6);
+                        
+                        // Puntos de agarre laterales visuales
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = "#ffffff";
+                        ctx.beginPath();
+                        ctx.arc(-cWidth / 2, 0, 5, 0, Math.PI * 2);
+                        ctx.arc(cWidth / 2, 0, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+
+                    ctx.restore();
+                });
+            }
+
+            // 4. Zócalos
+            state.stickers.forEach(st => {
+                const img = stickerImages[st.type];
+                if (!img) return;
+                ctx.save();
+                ctx.translate(st.x, st.y);
+                ctx.rotate((st.rotation * Math.PI) / 180);
+                ctx.scale(st.scale, st.scale);
+                const baseSize = Math.min(w, h) * 0.22;
+                const ratio = img.width && img.height ? img.width / img.height : 1;
+                const drawW = ratio >= 1 ? baseSize : baseSize * ratio;
+                const drawH = ratio >= 1 ? baseSize / ratio : baseSize;
+                ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+
+                if (st.id === state.selectedStickerId && state.mode === 'sticker') {
+                    ctx.strokeStyle = "#f59e0b";
+                    ctx.lineWidth = 3 / st.scale;
+                    ctx.setLineDash([6 / st.scale, 4 / st.scale]);
+                    ctx.strokeRect(-drawW / 2 - 4, -drawH / 2 - 4, drawW + 8, drawH + 8);
+                }
+                ctx.restore();
+            });
+
+            // 5. Guías de polígonos
+            if (state.showPolyGuide || state.mode === 'poly') {
+                drawPolygonOverlay(state.upperPoly, '#2563eb', 'rgba(37, 99, 235, 0.14)');
+                drawPolygonOverlay(state.lowerPoly, '#059669', 'rgba(5, 150, 105, 0.14)');
+                state.holePolys.forEach(hp => drawPolygonOverlay(hp, '#e11d48', 'rgba(225, 29, 72, 0.18)'));
+
+                if (state.activePoints.length > 0) {
+                    const col = state.polyTarget === 'upper' ? '#2563eb' : (state.polyTarget === 'lower' ? '#059669' : '#e11d48');
+                    ctx.save();
+                    ctx.strokeStyle = col;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    state.activePoints.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+                    ctx.stroke();
+
+                    state.activePoints.forEach((p, i) => {
+                        ctx.fillStyle = i === 0 ? '#f59e0b' : '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    });
+                    ctx.restore();
+                }
+            }
+        }
+
+        function drawPolygonOverlay(pts, strokeCol, fillCol) {
+            if (!pts || pts.length < 3) return;
+            ctx.save();
+            ctx.beginPath();
+            addPolyPath(ctx, pts);
+            ctx.fillStyle = fillCol;
+            ctx.fill();
+            ctx.strokeStyle = strokeCol;
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([8, 5]);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function addPolyPath(context, pts) {
+            pts.forEach((p, i) => i === 0 ? context.moveTo(p.x, p.y) : context.lineTo(p.x, p.y));
+            context.closePath();
+        }
+
+        // --- RELLENO Y PINCEL ---
+        function fillTargetPolygon(target) {
+            const poly = target === 'upper' ? state.upperPoly : state.lowerPoly;
+            if (!poly) return;
+            saveHistory();
+
+            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            maskCtx.save();
+            maskCtx.beginPath();
+            addPolyPath(maskCtx, poly);
+            state.holePolys.forEach(hp => addPolyPath(maskCtx, hp));
+            maskCtx.clip('evenodd');
+            maskCtx.fillStyle = state.selectedColor.hex;
+            maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+            maskCtx.restore();
+
+            paintCtx.drawImage(maskCanvas, 0, 0);
+            render();
+        }
+
+        function applyWallClip(context) {
+            if (!state.upperPoly && !state.lowerPoly) return false;
+            context.beginPath();
+            if (state.upperPoly) addPolyPath(context, state.upperPoly);
+            if (state.lowerPoly) addPolyPath(context, state.lowerPoly);
+            state.holePolys.forEach(hp => addPolyPath(context, hp));
+            context.clip('evenodd');
+            return true;
+        }
+
+        function paintStroke(x1, y1, x2, y2) {
+            paintCtx.save();
+            applyWallClip(paintCtx);
+            paintCtx.lineCap = 'round';
+            paintCtx.lineJoin = 'round';
+            paintCtx.lineWidth = state.brushSize;
+            if (state.paintTool === 'eraser') {
+                paintCtx.globalCompositeOperation = 'destination-out';
+                paintCtx.strokeStyle = 'rgba(0,0,0,1)';
+            } else {
+                paintCtx.globalCompositeOperation = 'source-over';
+                paintCtx.strokeStyle = state.selectedColor.hex;
+            }
+            paintCtx.beginPath();
+            paintCtx.moveTo(x1, y1);
+            paintCtx.lineTo(x2, y2);
+            paintCtx.stroke();
+            paintCtx.restore();
+            render();
+        }
+
+        // --- ZÓCALOS Y CARGA CON RECORTE DE FONDO NEGRO ---
+        function renderStickersCatalog() {
+            const grid = document.getElementById('stickersGrid');
+            grid.innerHTML = '';
+
+            ZOCALOS_DATA.forEach(item => {
+                const img = new Image();
+                img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(item.svg);
+                stickerImages[item.id] = img;
+                addStickerCardToGrid(item.id, item.title, img.src);
+            });
+        }
+
+        function addStickerCardToGrid(id, title, imgSrc) {
+            const grid = document.getElementById('stickersGrid');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = "bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-center gap-1 transition shadow-2xs";
+            btn.innerHTML = `<img src="${imgSrc}" class="w-12 h-12 object-contain pointer-events-none"><span class="text-[10px] font-bold text-slate-700 truncate w-full text-center">${escapeHtml(title)}</span>`;
+            btn.onclick = () => spawnSticker(id, title);
+            grid.appendChild(btn);
+        }
+
+        function processUploadedZocalo(file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const rawImg = new Image();
+                rawImg.onload = () => {
+                    const c = document.createElement('canvas');
+                    c.width = rawImg.width;
+                    c.height = rawImg.height;
+                    const cCtx = c.getContext('2d');
+                    cCtx.drawImage(rawImg, 0, 0);
+
+                    const imgData = cCtx.getImageData(0, 0, c.width, c.height);
+                    const d = imgData.data;
+                    const isDarkBg = (d[0] < 35 && d[1] < 35 && d[2] < 35);
+                    if (isDarkBg) {
+                        for (let i = 0; i < d.length; i += 4) {
+                            if (d[i] < 35 && d[i + 1] < 35 && d[i + 2] < 35) {
+                                d[i + 3] = 0;
+                            }
+                        }
+                        cCtx.putImageData(imgData, 0, 0);
+                    }
+
+                    const cleanUrl = c.toDataURL('image/png');
+                    const id = 'custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+                    const title = file.name.replace(/\.[^/.]+$/, "").replace(/SIN FONDO/i, "").trim() || 'Zócalo';
+                    const finalImg = new Image();
+                    finalImg.onload = () => {
+                        stickerImages[id] = finalImg;
+                        addStickerCardToGrid(id, title, cleanUrl);
+                        spawnSticker(id, title);
+                    };
+                    finalImg.src = cleanUrl;
+                };
+                rawImg.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function spawnSticker(type, title) {
+            saveHistory();
+            const newSt = {
+                id: 'st_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+                type,
+                title,
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                scale: 1,
+                rotation: 0
+            };
+            state.stickers.push(newSt);
+            state.selectedStickerId = newSt.id;
+            setMode('sticker');
+            updateFloatingControlsUI();
+            render();
+        }
+
+        // --- INTERACCIÓN CANVAS ---
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        let lastPos = null;
+
+        function findCenefaAt(x, y) {
+            if (!state.cenefasVisible) return null;
+            for (let i = state.cenefas.length - 1; i >= 0; i--) {
+                const cen = state.cenefas[i];
+                const cWidth = (cen.widthPercent / 100) * canvas.width;
+                const hitH = Math.max(cen.thickness + 24, 38); // Área táctil cómoda en móviles
+                const rad = -(cen.angle * Math.PI) / 180;
+                const dx = x - cen.x;
+                const dy = y - cen.y;
+                const localX = dx * Math.cos(rad) - dy * Math.sin(rad);
+                const localY = dx * Math.sin(rad) + dy * Math.cos(rad);
+                if (Math.abs(localX) <= cWidth / 2 + 12 && Math.abs(localY) <= hitH / 2) {
+                    return cen;
+                }
+            }
+            return null;
+        }
+
+        function handlePointerDown(e) {
+            if (!bgLoaded) return;
+            const pos = getCanvasCoords(e);
+
+            if (state.mode === 'poly') {
+                if (state.activePoints.length >= 3) {
+                    const first = state.activePoints[0];
+                    if (Math.hypot(pos.x - first.x, pos.y - first.y) < 22) {
+                        closeActivePolygon();
+                        return;
+                    }
+                }
+                state.activePoints.push(pos);
+                updatePolyButtons();
+                render();
+                return;
+            }
+
+            if (state.mode === 'cenefa') {
+                const hitCen = findCenefaAt(pos.x, pos.y);
+                if (hitCen) {
+                    state.selectedCenefaId = hitCen.id;
+                    state.isDraggingCenefa = true;
+                    state.dragOffset = { x: pos.x - hitCen.x, y: pos.y - hitCen.y };
+                    syncCenefaControlsUI();
+                    updateFloatingControlsUI();
+                    render();
+                }
+                return;
+            }
+
+            if (state.mode === 'sticker') {
+                const hit = findStickerAt(pos.x, pos.y);
+                if (hit) {
+                    state.selectedStickerId = hit.id;
+                    state.isDraggingSticker = true;
+                    state.dragOffset = { x: pos.x - hit.x, y: pos.y - hit.y };
+                    updateFloatingControlsUI();
+                    render();
+                    return;
+                } else {
+                    state.selectedStickerId = null;
+                    updateFloatingControlsUI();
+                    render();
+                }
+            }
+
+            if (state.mode === 'paint') {
+                saveHistory();
+                state.isDrawing = true;
+                lastPos = pos;
+                paintStroke(pos.x, pos.y, pos.x + 0.1, pos.y + 0.1);
+            }
+        }
+
+        function handlePointerMove(e) {
+            if (!bgLoaded) return;
+            const pos = getCanvasCoords(e);
+
+            if (state.isDraggingCenefa && state.selectedCenefaId) {
+                e.preventDefault();
+                const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                if (cen) {
+                    cen.x = pos.x - state.dragOffset.x;
+                    cen.y = pos.y - state.dragOffset.y;
+                    render();
+                }
+                return;
+            }
+
+            if (state.isDraggingSticker && state.selectedStickerId) {
+                e.preventDefault();
+                const st = state.stickers.find(s => s.id === state.selectedStickerId);
+                if (st) {
+                    st.x = pos.x - state.dragOffset.x;
+                    st.y = pos.y - state.dragOffset.y;
+                    render();
+                }
+                return;
+            }
+
+            if (state.isDrawing && state.mode === 'paint' && lastPos) {
+                e.preventDefault();
+                paintStroke(lastPos.x, lastPos.y, pos.x, pos.y);
+                lastPos = pos;
+            }
+        }
+
+        function handlePointerUp() {
+            state.isDrawing = false;
+            state.isDraggingSticker = false;
+            state.isDraggingCenefa = false;
+            lastPos = null;
+        }
+
+        function findStickerAt(x, y) {
+            const baseSize = Math.min(canvas.width, canvas.height) * 0.22;
+            for (let i = state.stickers.length - 1; i >= 0; i--) {
+                const st = state.stickers[i];
+                const radius = (baseSize * st.scale) * 0.55;
+                if (Math.hypot(x - st.x, y - st.y) <= radius) return st;
+            }
+            return null;
+        }
+
+        // --- CONTROLES Y MODOS ---
+        function setMode(newMode) {
+            state.mode = newMode;
+            document.querySelectorAll('.mode-btn').forEach(b => {
+                b.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+                b.classList.add('text-slate-600');
+            });
+            const map = { poly: 'modePoly', paint: 'modePaint', cenefa: 'modeCenefa', sticker: 'modeSticker' };
+            const activeBtn = document.getElementById(map[newMode]);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+                activeBtn.classList.remove('text-slate-600');
+            }
+            document.getElementById('polyToolbar').classList.toggle('hidden', newMode !== 'poly');
+
+            const hints = {
+                poly: 'Paso 1: Delimita la Parte Arriba y la Parte Abajo de la fachada',
+                paint: 'Paso 2: Rellena las zonas delimitadas o pinta detalles con el pincel',
+                cenefa: 'Paso 3: Arrastra la cenefa sobre el muro y estira su largo al ancho de la casa',
+                sticker: 'Paso 4: Toca un zócalo del catálogo y arrástralo sobre la fachada'
+            };
+            document.getElementById('canvasStatus').textContent = hints[newMode] || '';
+
+            updateFloatingControlsUI();
+            render();
+        }
+
+        function closeActivePolygon() {
+            if (state.activePoints.length < 3) return;
+            saveHistory();
+            if (state.polyTarget === 'upper') state.upperPoly = [...state.activePoints];
+            else if (state.polyTarget === 'lower') state.lowerPoly = [...state.activePoints];
+            else state.holePolys.push([...state.activePoints]);
+            state.activePoints = [];
+            updatePolyButtons();
+            render();
+        }
+
+        function updatePolyButtons() {
+            document.getElementById('btnCloseActivePoly').classList.toggle('hidden', state.activePoints.length < 3);
+            document.getElementById('btnFillUpper').disabled = !state.upperPoly;
+            document.getElementById('btnFillLower').disabled = !state.lowerPoly;
+        }
+
+        function syncCenefaControlsUI() {
+            const cen = state.cenefas.find(c => c.id === state.selectedCenefaId) || state.cenefas[0];
+            if (!cen) return;
+            document.getElementById('cenefaWidth').value = cen.widthPercent;
+            document.getElementById('cenefaWidthVal').textContent = cen.widthPercent + '%';
+            document.getElementById('cenefaThickness').value = cen.thickness;
+            document.getElementById('cenefaThicknessVal').textContent = cen.thickness + 'px';
+            document.getElementById('cenefaAngle').value = cen.angle;
+            document.getElementById('cenefaAngleVal').textContent = cen.angle + '°';
+        }
+
+        function updateFloatingControlsUI() {
+            const panel = document.getElementById('stickerControls');
+            const floatBar = document.getElementById('floatingStickerControls');
+            const label = document.getElementById('floatingElementLabel');
+
+            if (state.mode === 'cenefa' && state.cenefasVisible && state.selectedCenefaId) {
+                panel.classList.add('hidden');
+                floatBar.classList.remove('hidden');
+                label.textContent = 'Cenefa';
+                return;
+            }
+
+            const st = state.stickers.find(s => s.id === state.selectedStickerId);
+            if (!st || state.mode !== 'sticker') {
+                panel.classList.add('hidden');
+                floatBar.classList.add('hidden');
+                return;
+            }
+            panel.classList.remove('hidden');
+            floatBar.classList.remove('hidden');
+            label.textContent = 'Zócalo';
+            document.getElementById('selectedStickerTitle').textContent = st.title || 'Zócalo';
+            document.getElementById('stickerScale').value = st.scale;
+            document.getElementById('stickerRotate').value = st.rotation;
+        }
+
+        function renderPalette() {
+            const container = document.getElementById('colorPalette');
+            container.innerHTML = '';
+            PALETTE.forEach(c => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = "w-full aspect-square rounded-xl border-2 border-white shadow-xs transition transform hover:scale-105";
+                btn.style.backgroundColor = c.hex;
+                btn.title = c.name;
+                btn.onclick = () => {
+                    state.selectedColor = c;
+                    document.getElementById('selectedColorName').textContent = c.name;
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function saveHistory() {
+            if (state.history.length > 12) state.history.shift();
+            state.history.push({
+                paintData: paintCanvas.toDataURL(),
+                stickers: JSON.parse(JSON.stringify(state.stickers)),
+                cenefas: JSON.parse(JSON.stringify(state.cenefas)),
+                upperPoly: state.upperPoly ? [...state.upperPoly] : null,
+                lowerPoly: state.lowerPoly ? [...state.lowerPoly] : null,
+                holePolys: JSON.parse(JSON.stringify(state.holePolys))
+            });
+        }
+
+        function undo() {
+            const last = state.history.pop();
+            if (!last) return;
+            const img = new Image();
+            img.onload = () => {
+                paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+                paintCtx.drawImage(img, 0, 0);
+                state.stickers = last.stickers;
+                state.cenefas = last.cenefas || state.cenefas;
+                state.upperPoly = last.upperPoly;
+                state.lowerPoly = last.lowerPoly;
+                state.holePolys = last.holePolys;
+                updatePolyButtons();
+                syncCenefaControlsUI();
+                updateFloatingControlsUI();
+                render();
+            };
+            img.src = last.paintData;
+        }
+
+        // --- EVENT LISTENERS ---
+        function setupEventListeners() {
+            document.getElementById('modePoly').onclick = () => setMode('poly');
+            document.getElementById('modePaint').onclick = () => setMode('paint');
+            document.getElementById('modeCenefa').onclick = () => setMode('cenefa');
+            document.getElementById('modeSticker').onclick = () => setMode('sticker');
+
+            document.getElementById('targetUpper').onclick = () => { state.polyTarget = 'upper'; state.activePoints = []; updatePolyButtons(); render(); };
+            document.getElementById('targetLower').onclick = () => { state.polyTarget = 'lower'; state.activePoints = []; updatePolyButtons(); render(); };
+            document.getElementById('targetHole').onclick = () => { state.polyTarget = 'hole'; state.activePoints = []; updatePolyButtons(); render(); };
+            document.getElementById('btnCloseActivePoly').onclick = closeActivePolygon;
+            document.getElementById('btnResetPoly').onclick = () => {
+                state.activePoints = []; state.upperPoly = null; state.lowerPoly = null; state.holePolys = [];
+                updatePolyButtons(); render();
+            };
+            document.getElementById('showPolyGuide').onchange = (e) => { state.showPolyGuide = e.target.checked; render(); };
+
+            document.getElementById('btnFillUpper').onclick = () => fillTargetPolygon('upper');
+            document.getElementById('btnFillLower').onclick = () => fillTargetPolygon('lower');
+            document.getElementById('toolBrush').onclick = () => { state.paintTool = 'brush'; };
+            document.getElementById('toolEraser').onclick = () => { state.paintTool = 'eraser'; };
+            document.getElementById('brushSize').oninput = (e) => {
+                state.brushSize = parseInt(e.target.value);
+                document.getElementById('brushSizeVal').textContent = state.brushSize + 'px';
+            };
+
+            // Controles de Cenefa Ajustable
+            document.getElementById('cenefaToggle').onchange = (e) => {
+                state.cenefasVisible = e.target.checked;
+                updateFloatingControlsUI();
+                render();
+            };
+            document.getElementById('btnAddCenefa').onclick = () => {
+                saveHistory();
+                const nueva = createDefaultCenefa(canvas.width, canvas.height);
+                nueva.y += 30;
+                state.cenefas.push(nueva);
+                state.selectedCenefaId = nueva.id;
+                state.cenefasVisible = true;
+                document.getElementById('cenefaToggle').checked = true;
+                setMode('cenefa');
+                syncCenefaControlsUI();
+                render();
+            };
+            document.getElementById('cenefaWidth').oninput = (e) => {
+                const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                if (cen) {
+                    cen.widthPercent = parseInt(e.target.value);
+                    document.getElementById('cenefaWidthVal').textContent = cen.widthPercent + '%';
+                    render();
+                }
+            };
+            document.getElementById('cenefaThickness').oninput = (e) => {
+                const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                if (cen) {
+                    cen.thickness = parseInt(e.target.value);
+                    document.getElementById('cenefaThicknessVal').textContent = cen.thickness + 'px';
+                    render();
+                }
+            };
+            document.getElementById('cenefaAngle').oninput = (e) => {
+                const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                if (cen) {
+                    cen.angle = parseInt(e.target.value);
+                    document.getElementById('cenefaAngleVal').textContent = cen.angle + '°';
+                    render();
+                }
+            };
+            document.querySelectorAll('#cenefaColorQuick button').forEach(btn => {
+                btn.onclick = () => {
+                    const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                    if (cen) {
+                        cen.color = btn.dataset.col;
+                        render();
+                    }
+                };
+            });
+
+            // Controles Zócalo y Barra Flotante Compartida
+            document.getElementById('stickerScale').oninput = (e) => {
+                const st = state.stickers.find(s => s.id === state.selectedStickerId);
+                if (st) { st.scale = parseFloat(e.target.value); render(); }
+            };
+            document.getElementById('stickerRotate').oninput = (e) => {
+                const st = state.stickers.find(s => s.id === state.selectedStickerId);
+                if (st) { st.rotation = parseInt(e.target.value); render(); }
+            };
+            const delActiveElement = () => {
+                if (state.mode === 'cenefa' && state.selectedCenefaId) {
+                    state.cenefas = state.cenefas.filter(c => c.id !== state.selectedCenefaId);
+                    state.selectedCenefaId = state.cenefas.length ? state.cenefas[state.cenefas.length - 1].id : null;
+                    syncCenefaControlsUI();
+                    updateFloatingControlsUI();
+                    render();
+                    return;
+                }
+                state.stickers = state.stickers.filter(s => s.id !== state.selectedStickerId);
+                state.selectedStickerId = null;
+                updateFloatingControlsUI();
+                render();
+            };
+            document.getElementById('btnDeleteSticker').onclick = delActiveElement;
+            document.getElementById('quickDelete').onclick = delActiveElement;
+
+            document.getElementById('quickScaleUp').onclick = () => {
+                if (state.mode === 'cenefa') {
+                    const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                    if (cen) { cen.widthPercent = Math.min(100, cen.widthPercent + 5); syncCenefaControlsUI(); render(); }
+                    return;
+                }
+                const st = state.stickers.find(s => s.id === state.selectedStickerId);
+                if (st) { st.scale = Math.min(3.5, st.scale + 0.15); updateFloatingControlsUI(); render(); }
+            };
+            document.getElementById('quickScaleDown').onclick = () => {
+                if (state.mode === 'cenefa') {
+                    const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                    if (cen) { cen.widthPercent = Math.max(8, cen.widthPercent - 5); syncCenefaControlsUI(); render(); }
+                    return;
+                }
+                const st = state.stickers.find(s => s.id === state.selectedStickerId);
+                if (st) { st.scale = Math.max(0.3, st.scale - 0.15); updateFloatingControlsUI(); render(); }
+            };
+            document.getElementById('quickRotateLeft').onclick = () => {
+                if (state.mode === 'cenefa') {
+                    const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                    if (cen) { cen.angle = Math.max(-35, cen.angle - 2); syncCenefaControlsUI(); render(); }
+                    return;
+                }
+                const st = state.stickers.find(s => s.id === state.selectedStickerId);
+                if (st) { st.rotation -= 15; updateFloatingControlsUI(); render(); }
+            };
+            document.getElementById('quickRotateRight').onclick = () => {
+                if (state.mode === 'cenefa') {
+                    const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                    if (cen) { cen.angle = Math.min(35, cen.angle + 2); syncCenefaControlsUI(); render(); }
+                    return;
+                }
+                const st = state.stickers.find(s => s.id === state.selectedStickerId);
+                if (st) { st.rotation += 15; updateFloatingControlsUI(); render(); }
+            };
+            document.getElementById('quickDuplicate').onclick = () => {
+                if (state.mode === 'cenefa') {
+                    const cen = state.cenefas.find(c => c.id === state.selectedCenefaId);
+                    if (cen) {
+                        const copy = { ...cen, id: 'cen_' + Date.now(), x: cen.x + 25, y: cen.y + 25 };
+                        state.cenefas.push(copy);
+                        state.selectedCenefaId = copy.id;
+                        syncCenefaControlsUI();
+                        render();
+                    }
+                    return;
+                }
+                const st = state.stickers.find(s => s.id === state.selectedStickerId);
+                if (st) spawnSticker(st.type, st.title);
+            };
+
+            // Subida de fachada
+            document.getElementById('imageUpload').onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    bgImage.onload = () => {
+                        setupCanvasDimensions(bgImage.width, bgImage.height);
+                        bgLoaded = true;
+                        render();
+                    };
+                    bgImage.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            };
+
+            // Subida múltiple de zócalos propios (PNG/JPG)
+            document.getElementById('customZocaloUpload').onchange = (e) => {
+                Array.from(e.target.files).forEach(file => processUploadedZocalo(file));
+            };
+
+            document.getElementById('btnUndo').onclick = undo;
+            document.getElementById('btnClear').onclick = () => {
+                paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+                state.stickers = [];
+                state.selectedStickerId = null;
+                const resetCen = createDefaultCenefa(canvas.width, canvas.height);
+                state.cenefas = [resetCen];
+                state.selectedCenefaId = resetCen.id;
+                syncCenefaControlsUI();
+                updateFloatingControlsUI();
+                render();
+            };
+
+            document.getElementById('btnExport').onclick = () => {
+                const prevSel = state.selectedStickerId;
+                const prevMode = state.mode;
+                const prevGuide = state.showPolyGuide;
+                state.selectedStickerId = null;
+                state.mode = 'export';
+                state.showPolyGuide = false;
+                render();
+                const link = document.createElement('a');
+                link.download = `Fachada_Yolotl_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                state.selectedStickerId = prevSel;
+                state.mode = prevMode;
+                state.showPolyGuide = prevGuide;
+                render();
+            };
+
+            // Formulario Vecinos & GPS
+            document.getElementById('btnGetGPS').onclick = captureCurrentGPS;
+            document.getElementById('btnExportCSV').onclick = exportRecordsToExcelCSV;
+            document.getElementById('toggleRecordsList').onclick = () => {
+                document.getElementById('recordsListContainer').classList.toggle('hidden');
+            };
+
+            document.getElementById('neighborForm').onsubmit = (e) => {
+                e.preventDefault();
+                const largo = parseFloat(document.getElementById('regLargo').value) || 0;
+                const ancho = parseFloat(document.getElementById('regAncho').value) || 0;
+                const area = (largo > 0 && ancho > 0) ? (largo * ancho).toFixed(2) : '';
+
+                savedRecords.unshift({
+                    fecha: new Date().toLocaleString('es-MX'),
+                    nombre: document.getElementById('regNombre').value.trim(),
+                    direccion: document.getElementById('regDireccion').value.trim(),
+                    coordenadas: document.getElementById('regCoordenadas').value.trim(),
+                    largo: largo || '',
+                    ancho: ancho || '',
+                    areaM2: area,
+                    telefono: document.getElementById('regTelefono').value.trim(),
+                    referencia: document.getElementById('regReferencia').value.trim(),
+                    colorPrincipal: state.selectedColor.name,
+                    zocalos: state.stickers.map(s => s.title).join(' + ') || 'Ninguno'
+                });
+                saveRecordsToStorage();
+                e.target.reset();
+                const fb = document.getElementById('regFeedback');
+                fb.textContent = 'Registro guardado correctamente.';
+                fb.classList.remove('hidden');
+                setTimeout(() => fb.classList.add('hidden'), 3000);
+            };
+
+            canvas.addEventListener('mousedown', handlePointerDown);
+            canvas.addEventListener('mousemove', handlePointerMove);
+            window.addEventListener('mouseup', handlePointerUp);
+            canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+            canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+            window.addEventListener('touchend', handlePointerUp);
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
