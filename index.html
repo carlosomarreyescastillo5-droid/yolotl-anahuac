@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .canvas-container { touch-action: none; user-select: none; }
@@ -21,12 +22,9 @@
     <header class="bg-gradient-to-r from-amber-600 via-rose-600 to-red-700 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <!-- Emblema Oficial Yólotl Anáhuac (Corazón) -->
                 <div class="w-11 h-12 rounded-xl bg-white/15 backdrop-blur-xs flex items-center justify-center p-1 border border-white/30 shadow-sm shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 145" class="w-full h-full drop-shadow">
-                        <!-- Contorno festoneado morado -->
                         <path d="M60 8 C35 8 15 24 14 52 C13 80 35 104 60 116 C85 104 107 80 106 52 C105 24 85 8 60 8 Z" fill="#9b72cf" stroke="#1e1b18" stroke-width="3.5" stroke-linejoin="round"/>
-                        <!-- Puntos blancos decorativos en marco -->
                         <circle cx="60" cy="14" r="2.8" fill="#ffffff"/>
                         <circle cx="34" cy="21" r="2.8" fill="#ffffff"/>
                         <circle cx="86" cy="21" r="2.8" fill="#ffffff"/>
@@ -36,14 +34,10 @@
                         <circle cx="95" cy="72" r="2.8" fill="#ffffff"/>
                         <circle cx="42" cy="96" r="2.8" fill="#ffffff"/>
                         <circle cx="78" cy="96" r="2.8" fill="#ffffff"/>
-                        <!-- Fondo amarillo interior -->
                         <path d="M60 18 C40 18 24 31 24 53 C24 75 42 95 60 105 C78 95 96 75 96 53 C96 31 80 18 60 18 Z" fill="#facc15" stroke="#1e1b18" stroke-width="2.5"/>
-                        <!-- Arterias superiores -->
                         <path d="M47 42 L44 26 Q49 23 55 26 L56 42 Z" fill="#f43f5e" stroke="#1e1b18" stroke-width="2.5"/>
                         <path d="M64 42 L66 27 Q72 24 76 28 L72 44 Z" fill="#f43f5e" stroke="#1e1b18" stroke-width="2.5"/>
-                        <!-- Parte superior del corazón -->
                         <path d="M31 54 C27 36 48 33 60 47 C72 33 93 36 89 54 C88 62 84 67 84 67 L36 67 C36 67 32 62 31 54 Z" fill="#f43f5e" stroke="#1e1b18" stroke-width="2.5"/>
-                        <!-- Franja central roja con 3 círculos turquesa -->
                         <rect x="35" y="64" width="50" height="17" rx="5" fill="#dc2626" stroke="#1e1b18" stroke-width="2.5"/>
                         <circle cx="45" cy="72.5" r="4.5" fill="#2dd4bf" stroke="#1e1b18" stroke-width="2"/>
                         <circle cx="45" cy="72.5" r="1.5" fill="#facc15"/>
@@ -51,9 +45,7 @@
                         <circle cx="60" cy="72.5" r="1.5" fill="#facc15"/>
                         <circle cx="75" cy="72.5" r="4.5" fill="#2dd4bf" stroke="#1e1b18" stroke-width="2"/>
                         <circle cx="75" cy="72.5" r="1.5" fill="#facc15"/>
-                        <!-- Punta inferior vino -->
                         <path d="M38 81 L82 81 C78 92 60 101 60 101 C60 101 42 92 38 81 Z" fill="#9f1239" stroke="#1e1b18" stroke-width="2.5"/>
-                        <!-- Gota/sello inferior -->
                         <circle cx="60" cy="130" r="8" fill="#ffffff" stroke="#1e1b18" stroke-width="2.5"/>
                         <circle cx="60" cy="130" r="4" fill="#2dd4bf" stroke="#1e1b18" stroke-width="1.5"/>
                     </svg>
@@ -157,7 +149,7 @@
             <div class="relative bg-slate-800 flex items-center justify-center p-3 overflow-hidden canvas-container min-h-[420px] lg:min-h-[540px]" id="canvasWrapper">
                 <canvas id="mainCanvas" style="max-width: 100%; max-height: 70vh; width: auto; height: auto;" class="shadow-lg rounded cursor-crosshair bg-slate-700"></canvas>
                 
-                <!-- Floating Element Toolbar (Zócalo o Cenefa) -->
+                <!-- Floating Element Toolbar -->
                 <div id="floatingStickerControls" class="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-3 py-2 rounded-2xl shadow-xl flex items-center space-x-2 hidden z-20 border border-slate-700">
                     <span id="floatingElementLabel" class="text-xs font-bold px-2 text-amber-400 border-r border-slate-700 hidden sm:inline">Zócalo</span>
                     <button id="quickScaleUp" class="p-2 hover:bg-slate-700 rounded-lg text-xs font-bold" title="Agrandar / Estirar"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
@@ -178,14 +170,14 @@
         <!-- Sidebar -->
         <aside class="lg:col-span-4 flex flex-col space-y-4">
 
-            <!-- Panel 0: Registro de Datos del Vecino -->
+            <!-- Panel 0: Registro de Datos del Vecino (Nube Supabase) -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="font-bold text-slate-800 flex items-center space-x-2">
-                        <i class="fa-solid fa-address-card text-rose-600"></i>
+                        <i class="fa-solid fa-cloud-arrow-up text-rose-600"></i>
                         <span>Datos del Vecino</span>
                     </h2>
-                    <span id="recordsCounterBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">0 guardados</span>
+                    <span id="recordsCounterBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Cargando...</span>
                 </div>
 
                 <form id="neighborForm" class="space-y-2.5 text-xs">
@@ -236,9 +228,9 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button type="submit" class="py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                            <span>Guardar Registro</span>
+                        <button type="submit" id="btnSubmitRecord" class="py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Guardar en Nube</span>
                         </button>
                         <button type="button" id="btnExportCSV" class="py-2 px-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition">
                             <i class="fa-solid fa-file-excel"></i>
@@ -251,7 +243,7 @@
 
                 <div class="mt-3 pt-2.5 border-t border-slate-100">
                     <button type="button" id="toggleRecordsList" class="w-full flex items-center justify-between text-xs font-semibold text-slate-600 hover:text-slate-900">
-                        <span>Ver listado guardado en este equipo</span>
+                        <span>Ver listado guardado en la nube</span>
                         <i class="fa-solid fa-chevron-down text-[10px]" id="recordsChevron"></i>
                     </button>
                     <div id="recordsListContainer" class="hidden mt-2 max-h-40 overflow-y-auto space-y-1.5 pr-1"></div>
@@ -302,7 +294,7 @@
                 </div>
             </div>
 
-            <!-- Panel 2: Cenefa Ajustable (Arrastrable y Estirable) -->
+            <!-- Panel 2: Cenefa Ajustable -->
             <div id="cenefaPanel" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                 <div class="flex items-center justify-between mb-2">
                     <h2 class="font-bold text-slate-800 flex items-center space-x-2">
@@ -363,13 +355,13 @@
                         <i class="fa-solid fa-icons text-amber-600"></i>
                         <span>Catálogo de Zócalos</span>
                     </h2>
-                    <label for="customZocaloUpload" class="cursor-pointer text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 rounded-lg flex items-center space-x-1 transition" title="Sube tus zócalos JPG/PNG (quita el fondo negro automáticamente)">
-                        <i class="fa-solid fa-upload"></i>
+                    <label for="customZocaloUpload" id="labelUploadZocalo" class="cursor-pointer text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 rounded-lg flex items-center space-x-1 transition" title="Sube tus zócalos JPG/PNG y guárdalos en la nube">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
                         <span>+ Subir PNG/JPG</span>
                     </label>
                     <input type="file" id="customZocaloUpload" accept="image/*" multiple class="hidden">
                 </div>
-                <p class="text-xs text-slate-500 mb-3">Toca una figura para ponerla en la pared o sube tus imágenes JPG/PNG.</p>
+                <p class="text-xs text-slate-500 mb-3">Toca una figura para ponerla en la pared. Los que subas quedan guardados para todos.</p>
 
                 <div class="grid grid-cols-3 gap-2 overflow-y-auto max-h-64 p-1.5 bg-slate-50 rounded-xl border border-slate-100" id="stickersGrid"></div>
 
@@ -402,7 +394,10 @@
     </footer>
 
     <script>
-        const STORAGE_KEY = 'yolotl_anahuac_vecinos_v2';
+        // --- CONEXIÓN A SUPABASE ---
+        const SUPABASE_URL = 'https://ygrpffklmjyvtdwfmhtn.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_oo_GucFkclZl6k9Un82i5A_KzA21yan';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const PALETTE = [
             { name: "Azul Teotihuacano", hex: "#1e52a4" },
@@ -468,7 +463,6 @@
             selectedColor: PALETTE[0],
             paintTool: 'brush',
             brushSize: 45,
-            // Cenefas como elementos independientes arrastrables y estirables
             cenefasVisible: true,
             cenefas: [],
             selectedCenefaId: null,
@@ -497,44 +491,45 @@
         const stickerImages = {};
 
         // --- INICIALIZACIÓN ---
-        function init() {
-            loadRecordsFromStorage();
-            renderRecordsUI();
+        async function init() {
             renderPalette();
-            renderStickersCatalog();
+            await renderStickersCatalog();
             loadDefaultFacade();
             setupEventListeners();
             setMode('poly');
+            await loadRecordsFromSupabase();
         }
 
-        // --- REGISTRO DE VECINOS ---
-        function loadRecordsFromStorage() {
+        // --- REGISTRO DE VECINOS EN SUPABASE ---
+        async function loadRecordsFromSupabase() {
+            const badge = document.getElementById('recordsCounterBadge');
             try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                savedRecords = raw ? JSON.parse(raw) : [];
-            } catch (e) {
-                savedRecords = [];
+                const { data, error } = await supabaseClient
+                    .from('vecinos_yolotl')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (error) throw error;
+                savedRecords = data || [];
+                renderRecordsUI();
+            } catch (err) {
+                badge.textContent = 'Sin conexión';
+                badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800';
             }
-        }
-
-        function saveRecordsToStorage() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRecords));
-            } catch (e) {}
-            renderRecordsUI();
         }
 
         function renderRecordsUI() {
             const badge = document.getElementById('recordsCounterBadge');
             const container = document.getElementById('recordsListContainer');
-            badge.textContent = `${savedRecords.length} guardado${savedRecords.length === 1 ? '' : 's'}`;
+            badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+            badge.textContent = `${savedRecords.length} en nube`;
 
             if (savedRecords.length === 0) {
-                container.innerHTML = `<p class="text-[11px] text-slate-400 italic py-1">Aún no hay registros guardados en este dispositivo.</p>`;
+                container.innerHTML = `<p class="text-[11px] text-slate-400 italic py-1">Aún no hay registros guardados en la base de datos.</p>`;
                 return;
             }
 
-            container.innerHTML = savedRecords.map((rec, idx) => `
+            container.innerHTML = savedRecords.map((rec) => `
                 <div class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-[11px] flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <p class="font-bold text-slate-800 truncate">${escapeHtml(rec.nombre)}</p>
@@ -544,16 +539,20 @@
                             ${rec.coordenadas ? `GPS: ${escapeHtml(rec.coordenadas)}` : ''}
                         </p>
                     </div>
-                    <button type="button" onclick="deleteNeighborRecord(${idx})" class="text-rose-500 hover:text-rose-700 p-1 shrink-0" title="Borrar registro">
+                    <button type="button" onclick="deleteNeighborRecord(${rec.id})" class="text-rose-500 hover:text-rose-700 p-1 shrink-0" title="Borrar registro de la nube">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
             `).join('');
         }
 
-        window.deleteNeighborRecord = function(idx) {
-            savedRecords.splice(idx, 1);
-            saveRecordsToStorage();
+        window.deleteNeighborRecord = async function(id) {
+            if (!confirm('¿Eliminar este registro de la base de datos compartida?')) return;
+            const { error } = await supabaseClient.from('vecinos_yolotl').delete().eq('id', id);
+            if (!error) {
+                savedRecords = savedRecords.filter(r => r.id !== id);
+                renderRecordsUI();
+            }
         };
 
         function escapeHtml(str) {
@@ -594,7 +593,7 @@
 
         function exportRecordsToExcelCSV() {
             if (savedRecords.length === 0) {
-                alert('Primero guarda al menos un registro de vecino para descargar el Excel.');
+                alert('Aún no hay registros en la base de datos para descargar el Excel.');
                 return;
             }
 
@@ -606,8 +605,8 @@
 
             const rows = savedRecords.map(r => [
                 r.fecha, r.nombre, r.direccion, r.coordenadas,
-                r.largo, r.ancho, r.areaM2,
-                r.telefono, r.referencia, r.colorPrincipal, r.zocalos
+                r.largo, r.ancho, r.area_m2,
+                r.telefono, r.referencia, r.color_principal, r.zocalos
             ]);
 
             const csvContent = '\uFEFF' + [headers, ...rows]
@@ -673,7 +672,7 @@
                 id: 'cen_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
                 x: Math.round(w * 0.5),
                 y: Math.round(h * 0.55),
-                widthPercent: 30, // Inicia compacta (30% del ancho) para estirarla al tamaño de la casa
+                widthPercent: 30,
                 thickness: 18,
                 angle: 0,
                 color: '#f5b719'
@@ -701,7 +700,6 @@
             state.stickers = [];
             state.selectedStickerId = null;
             
-            // Inicializa una cenefa compacta lista para mover y estirar
             const initialCenefa = createDefaultCenefa(w, h);
             state.cenefas = [initialCenefa];
             state.selectedCenefaId = initialCenefa.id;
@@ -720,17 +718,14 @@
             const w = canvas.width, h = canvas.height;
             ctx.clearRect(0, 0, w, h);
 
-            // 1. Foto base
             ctx.drawImage(bgImage, 0, 0, w, h);
 
-            // 2. Pintura con efecto multiply
             ctx.save();
             ctx.globalCompositeOperation = 'multiply';
             ctx.globalAlpha = 0.86;
             ctx.drawImage(paintCanvas, 0, 0);
             ctx.restore();
 
-            // 3. Cenefas ajustables (compactas, arrastrables y estirables)
             if (state.cenefasVisible && state.cenefas.length > 0) {
                 state.cenefas.forEach(cen => {
                     const cWidth = Math.round((cen.widthPercent / 100) * w);
@@ -740,11 +735,9 @@
                     ctx.translate(cen.x, cen.y);
                     ctx.rotate((cen.angle * Math.PI) / 180);
 
-                    // Fondo de cenefa
                     ctx.fillStyle = cen.color;
                     ctx.fillRect(-cWidth / 2, -thick / 2, cWidth, thick);
 
-                    // Patrón geométrico tradicional
                     ctx.fillStyle = "rgba(0,0,0,0.28)";
                     const step = Math.max(10, thick * 1.35);
                     for (let lx = -cWidth / 2 + 4; lx < cWidth / 2 - 4; lx += step) {
@@ -754,14 +747,12 @@
                         }
                     }
 
-                    // Marco de selección si está activa y estamos en modo cenefa
                     if (cen.id === state.selectedCenefaId && state.mode === 'cenefa') {
                         ctx.strokeStyle = "#2563eb";
                         ctx.lineWidth = 2.5;
                         ctx.setLineDash([6, 4]);
                         ctx.strokeRect(-cWidth / 2 - 3, -thick / 2 - 3, cWidth + 6, thick + 6);
                         
-                        // Puntos de agarre laterales visuales
                         ctx.setLineDash([]);
                         ctx.fillStyle = "#ffffff";
                         ctx.beginPath();
@@ -775,7 +766,6 @@
                 });
             }
 
-            // 4. Zócalos
             state.stickers.forEach(st => {
                 const img = stickerImages[st.type];
                 if (!img) return;
@@ -798,7 +788,6 @@
                 ctx.restore();
             });
 
-            // 5. Guías de polígonos
             if (state.showPolyGuide || state.mode === 'poly') {
                 drawPolygonOverlay(state.upperPoly, '#2563eb', 'rgba(37, 99, 235, 0.14)');
                 drawPolygonOverlay(state.lowerPoly, '#059669', 'rgba(5, 150, 105, 0.14)');
@@ -895,39 +884,96 @@
             render();
         }
 
-        // --- ZÓCALOS Y CARGA CON RECORTE DE FONDO NEGRO ---
-        function renderStickersCatalog() {
+        // --- CATÁLOGO DE ZÓCALOS (BASE + SUPABASE) ---
+        async function renderStickersCatalog() {
             const grid = document.getElementById('stickersGrid');
             grid.innerHTML = '';
 
+            // 1. Zócalos base
             ZOCALOS_DATA.forEach(item => {
                 const img = new Image();
                 img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(item.svg);
                 stickerImages[item.id] = img;
-                addStickerCardToGrid(item.id, item.title, img.src);
+                addStickerCardToGrid(item.id, item.title, img.src, null);
             });
+
+            // 2. Zócalos subidos previamente guardados en Supabase
+            try {
+                const { data, error } = await supabaseClient
+                    .from('zocalos_personalizados')
+                    .select('*')
+                    .order('id', { ascending: true });
+
+                if (!error && data) {
+                    data.forEach(row => {
+                        const id = 'db_zocalo_' + row.id;
+                        const img = new Image();
+                        img.src = row.imagen_data;
+                        stickerImages[id] = img;
+                        addStickerCardToGrid(id, row.titulo, row.imagen_data, row.id);
+                    });
+                }
+            } catch (e) {}
         }
 
-        function addStickerCardToGrid(id, title, imgSrc) {
+        function addStickerCardToGrid(id, title, imgSrc, dbRowId) {
             const grid = document.getElementById('stickersGrid');
+            const wrapper = document.createElement('div');
+            wrapper.className = "relative group";
+
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = "bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-center gap-1 transition shadow-2xs";
+            btn.className = "w-full bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-400 rounded-xl p-2 flex flex-col items-center justify-center gap-1 transition shadow-2xs";
             btn.innerHTML = `<img src="${imgSrc}" class="w-12 h-12 object-contain pointer-events-none"><span class="text-[10px] font-bold text-slate-700 truncate w-full text-center">${escapeHtml(title)}</span>`;
             btn.onclick = () => spawnSticker(id, title);
-            grid.appendChild(btn);
+            wrapper.appendChild(btn);
+
+            if (dbRowId) {
+                const delBtn = document.createElement('button');
+                delBtn.type = 'button';
+                delBtn.title = 'Eliminar zócalo guardado';
+                delBtn.className = "absolute top-1 right-1 bg-rose-600 text-white rounded-full w-4 h-4 text-[9px] flex items-center justify-center opacity-80 hover:opacity-100 shadow";
+                delBtn.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                delBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    if (!confirm(`¿Quitar "${title}" del catálogo en la nube?`)) return;
+                    const { error } = await supabaseClient.from('zocalos_personalizados').delete().eq('id', dbRowId);
+                    if (!error) wrapper.remove();
+                };
+                wrapper.appendChild(delBtn);
+            }
+
+            grid.appendChild(wrapper);
         }
 
         function processUploadedZocalo(file) {
+            const labelBtn = document.getElementById('labelUploadZocalo');
+            const originalHTML = labelBtn.innerHTML;
+            labelBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Guardando...</span>`;
+
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const rawImg = new Image();
-                rawImg.onload = () => {
+                rawImg.onload = async () => {
+                    // Redimensionar máximo a 360px para que cargue ultrarrápido y ligero en la base de datos
+                    const maxDim = 360;
+                    let tw = rawImg.width;
+                    let th = rawImg.height;
+                    if (tw > maxDim || th > maxDim) {
+                        if (tw >= th) {
+                            th = Math.round(th * (maxDim / tw));
+                            tw = maxDim;
+                        } else {
+                            tw = Math.round(tw * (maxDim / th));
+                            th = maxDim;
+                        }
+                    }
+
                     const c = document.createElement('canvas');
-                    c.width = rawImg.width;
-                    c.height = rawImg.height;
+                    c.width = tw;
+                    c.height = th;
                     const cCtx = c.getContext('2d');
-                    cCtx.drawImage(rawImg, 0, 0);
+                    cCtx.drawImage(rawImg, 0, 0, tw, th);
 
                     const imgData = cCtx.getImageData(0, 0, c.width, c.height);
                     const d = imgData.data;
@@ -942,13 +988,26 @@
                     }
 
                     const cleanUrl = c.toDataURL('image/png');
-                    const id = 'custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
                     const title = file.name.replace(/\.[^/.]+$/, "").replace(/SIN FONDO/i, "").trim() || 'Zócalo';
+
+                    // Guardar en Supabase para que quede disponible para todos
+                    let dbRowId = null;
+                    try {
+                        const { data, error } = await supabaseClient
+                            .from('zocalos_personalizados')
+                            .insert([{ titulo: title, imagen_data: cleanUrl }])
+                            .select()
+                            .single();
+                        if (!error && data) dbRowId = data.id;
+                    } catch (err) {}
+
+                    const id = dbRowId ? ('db_zocalo_' + dbRowId) : ('custom_' + Date.now());
                     const finalImg = new Image();
                     finalImg.onload = () => {
                         stickerImages[id] = finalImg;
-                        addStickerCardToGrid(id, title, cleanUrl);
+                        addStickerCardToGrid(id, title, cleanUrl, dbRowId);
                         spawnSticker(id, title);
+                        labelBtn.innerHTML = originalHTML;
                     };
                     finalImg.src = cleanUrl;
                 };
@@ -993,7 +1052,7 @@
             for (let i = state.cenefas.length - 1; i >= 0; i--) {
                 const cen = state.cenefas[i];
                 const cWidth = (cen.widthPercent / 100) * canvas.width;
-                const hitH = Math.max(cen.thickness + 24, 38); // Área táctil cómoda en móviles
+                const hitH = Math.max(cen.thickness + 24, 38);
                 const rad = -(cen.angle * Math.PI) / 180;
                 const dx = x - cen.x;
                 const dy = y - cen.y;
@@ -1267,7 +1326,6 @@
                 document.getElementById('brushSizeVal').textContent = state.brushSize + 'px';
             };
 
-            // Controles de Cenefa Ajustable
             document.getElementById('cenefaToggle').onchange = (e) => {
                 state.cenefasVisible = e.target.checked;
                 updateFloatingControlsUI();
@@ -1319,7 +1377,6 @@
                 };
             });
 
-            // Controles Zócalo y Barra Flotante Compartida
             document.getElementById('stickerScale').oninput = (e) => {
                 const st = state.stickers.find(s => s.id === state.selectedStickerId);
                 if (st) { st.scale = parseFloat(e.target.value); render(); }
@@ -1397,7 +1454,6 @@
                 if (st) spawnSticker(st.type, st.title);
             };
 
-            // Subida de fachada
             document.getElementById('imageUpload').onchange = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -1413,9 +1469,9 @@
                 reader.readAsDataURL(file);
             };
 
-            // Subida múltiple de zócalos propios (PNG/JPG)
             document.getElementById('customZocaloUpload').onchange = (e) => {
                 Array.from(e.target.files).forEach(file => processUploadedZocalo(file));
+                e.target.value = '';
             };
 
             document.getElementById('btnUndo').onclick = undo;
@@ -1449,38 +1505,63 @@
                 render();
             };
 
-            // Formulario Vecinos & GPS
+            // Formulario Vecinos & GPS -> Guardar directo en Supabase
             document.getElementById('btnGetGPS').onclick = captureCurrentGPS;
             document.getElementById('btnExportCSV').onclick = exportRecordsToExcelCSV;
             document.getElementById('toggleRecordsList').onclick = () => {
                 document.getElementById('recordsListContainer').classList.toggle('hidden');
             };
 
-            document.getElementById('neighborForm').onsubmit = (e) => {
+            document.getElementById('neighborForm').onsubmit = async (e) => {
                 e.preventDefault();
+                const submitBtn = document.getElementById('btnSubmitRecord');
+                const fb = document.getElementById('regFeedback');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Guardando...</span>`;
+
                 const largo = parseFloat(document.getElementById('regLargo').value) || 0;
                 const ancho = parseFloat(document.getElementById('regAncho').value) || 0;
                 const area = (largo > 0 && ancho > 0) ? (largo * ancho).toFixed(2) : '';
 
-                savedRecords.unshift({
+                const nuevoRegistro = {
                     fecha: new Date().toLocaleString('es-MX'),
                     nombre: document.getElementById('regNombre').value.trim(),
                     direccion: document.getElementById('regDireccion').value.trim(),
                     coordenadas: document.getElementById('regCoordenadas').value.trim(),
-                    largo: largo || '',
-                    ancho: ancho || '',
-                    areaM2: area,
+                    largo: largo ? String(largo) : '',
+                    ancho: ancho ? String(ancho) : '',
+                    area_m2: area,
                     telefono: document.getElementById('regTelefono').value.trim(),
                     referencia: document.getElementById('regReferencia').value.trim(),
-                    colorPrincipal: state.selectedColor.name,
+                    color_principal: state.selectedColor.name,
                     zocalos: state.stickers.map(s => s.title).join(' + ') || 'Ninguno'
-                });
-                saveRecordsToStorage();
-                e.target.reset();
-                const fb = document.getElementById('regFeedback');
-                fb.textContent = 'Registro guardado correctamente.';
-                fb.classList.remove('hidden');
-                setTimeout(() => fb.classList.add('hidden'), 3000);
+                };
+
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('vecinos_yolotl')
+                        .insert([nuevoRegistro])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+
+                    savedRecords.unshift(data);
+                    renderRecordsUI();
+                    e.target.reset();
+
+                    fb.className = 'mt-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-lg';
+                    fb.textContent = '¡Registro guardado en la nube correctamente!';
+                    fb.classList.remove('hidden');
+                } catch (err) {
+                    fb.className = 'mt-2 text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1.5 rounded-lg';
+                    fb.textContent = 'Error al guardar en la nube. Revisa tu conexión.';
+                    fb.classList.remove('hidden');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i><span>Guardar en Nube</span>`;
+                    setTimeout(() => fb.classList.add('hidden'), 3500);
+                }
             };
 
             canvas.addEventListener('mousedown', handlePointerDown);
